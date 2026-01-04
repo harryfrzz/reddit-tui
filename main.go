@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"reddit-tui/internal/ui"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 

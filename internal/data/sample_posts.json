@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Building a Reddit TUI with Go and Bubble Tea",
+    "subreddit": "r/golang",
+    "author": "gopher_dev",
+    "upvotes": 342,
+    "comments": 45
+  },
+  {
+    "title": "What are your favorite terminal tools?",
+    "subreddit": "r/commandline",
+    "author": "cli_enthusiast",
+    "upvotes": 528,
+    "comments": 89
+  },
+  {
+    "title": "Show HN: My weekend project - a Reddit client for the terminal",
+    "subreddit": "r/programming",
+    "author": "weekend_coder",
+    "upvotes": 1205,
+    "comments": 134
+  },
+  {
+    "title": "TUI vs GUI: The eternal debate",
+    "subreddit": "r/linux",
+    "author": "terminal_lover",
+    "upvotes": 876,
+    "comments": 201
+  },
+  {
+    "title": "Charm libraries are amazing for building TUIs",
+    "subreddit": "r/golang",
+    "author": "bubble_fan",
+    "upvotes": 445,
+    "comments": 67
+  },
+  {
+    "title": "Ask Reddit: What's your development setup?",
+    "subreddit": "r/AskReddit",
+    "author": "curious_dev",
+    "upvotes": 2301,
+    "comments": 456
+  },
+  {
+    "title": "Vim vs Emacs: A comprehensive comparison",
+    "subreddit": "r/programming",
+    "author": "editor_wars",
+    "upvotes": 689,
+    "comments": 342
+  },
+  {
+    "title": "Why I switched from GUI apps to terminal",
+    "subreddit": "r/commandline",
+    "author": "minimalist_dev",
+    "upvotes": 934,
+    "comments": 178
+  }
+]

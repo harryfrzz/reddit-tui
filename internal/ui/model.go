@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"reddit-tui/internal/data"
+	"reddit-tui/internal/icons"
 	"reddit-tui/internal/models"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,26 +16,32 @@ type Model struct {
 	ActivePane    string
 	Width         int
 	Height        int
+	PostsScroll   int
+	PreviewScroll int
 }
 
 func InitialModel() Model {
+	posts, err := data.LoadSamplePosts()
+	if err != nil {
+		posts = []models.Post{}
+	}
+
 	return Model{
-		SidebarItems: []string{"Home", "Popular", "Explore", "Settings", "Login/Auth"},
-		Posts: []models.Post{
-			{Title: "Building a Reddit TUI with Go and Bubble Tea", Subreddit: "r/golang", Author: "gopher_dev", Upvotes: 342, Comments: 45},
-			{Title: "What are your favorite terminal tools?", Subreddit: "r/commandline", Author: "cli_enthusiast", Upvotes: 528, Comments: 89},
-			{Title: "Show HN: My weekend project - a Reddit client for the terminal", Subreddit: "r/programming", Author: "weekend_coder", Upvotes: 1205, Comments: 134},
-			{Title: "TUI vs GUI: The eternal debate", Subreddit: "r/linux", Author: "terminal_lover", Upvotes: 876, Comments: 201},
-			{Title: "Charm libraries are amazing for building TUIs", Subreddit: "r/golang", Author: "bubble_fan", Upvotes: 445, Comments: 67},
-			{Title: "Ask Reddit: What's your development setup?", Subreddit: "r/AskReddit", Author: "curious_dev", Upvotes: 2301, Comments: 456},
-			{Title: "Vim vs Emacs: A comprehensive comparison", Subreddit: "r/programming", Author: "editor_wars", Upvotes: 689, Comments: 342},
-			{Title: "Why I switched from GUI apps to terminal", Subreddit: "r/commandline", Author: "minimalist_dev", Upvotes: 934, Comments: 178},
+		SidebarItems: []string{
+			icons.Home + " Home",
+			icons.Popular + " Popular",
+			icons.Explore + " Explore",
+			icons.Settings + " Settings",
+			icons.Login + " Login/Auth",
 		},
+		Posts:         posts,
 		SidebarCursor: 0,
 		PostsCursor:   0,
 		ActivePane:    "sidebar",
 		Width:         80,
 		Height:        24,
+		PostsScroll:   0,
+		PreviewScroll: 0,
 	}
 }
 
@@ -54,19 +62,41 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "tab":
-			if m.ActivePane == "sidebar" {
+			switch m.ActivePane {
+			case "sidebar":
 				m.ActivePane = "posts"
-			} else {
+			case "posts":
+				m.ActivePane = "preview"
+			case "preview":
 				m.ActivePane = "sidebar"
+			}
+		case "u":
+			// Upvote the current post (only in preview pane)
+			if m.ActivePane == "preview" && m.PostsCursor >= 0 && m.PostsCursor < len(m.Posts) {
+				m.Posts[m.PostsCursor].ToggleUpvote()
+			}
+		case "d":
+			// Downvote the current post (only in preview pane)
+			if m.ActivePane == "preview" && m.PostsCursor >= 0 && m.PostsCursor < len(m.Posts) {
+				m.Posts[m.PostsCursor].ToggleDownvote()
 			}
 		case "up", "k":
 			if m.ActivePane == "sidebar" {
 				if m.SidebarCursor > 0 {
 					m.SidebarCursor--
 				}
-			} else {
+			} else if m.ActivePane == "posts" {
 				if m.PostsCursor > 0 {
 					m.PostsCursor--
+					m.PreviewScroll = 0 // Reset preview scroll when changing posts
+					// Keep cursor in view
+					if m.PostsCursor < m.PostsScroll {
+						m.PostsScroll = m.PostsCursor
+					}
+				}
+			} else if m.ActivePane == "preview" {
+				if m.PreviewScroll > 0 {
+					m.PreviewScroll--
 				}
 			}
 		case "down", "j":
@@ -74,10 +104,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.SidebarCursor < len(m.SidebarItems)-1 {
 					m.SidebarCursor++
 				}
-			} else {
+			} else if m.ActivePane == "posts" {
 				if m.PostsCursor < len(m.Posts)-1 {
 					m.PostsCursor++
+					m.PreviewScroll = 0
+					visiblePosts := (m.Height - 3 - 4) / 4
+					if visiblePosts < 1 {
+						visiblePosts = 1
+					}
+					if m.PostsCursor >= m.PostsScroll+visiblePosts {
+						m.PostsScroll = m.PostsCursor - visiblePosts + 1
+					}
 				}
+			} else if m.ActivePane == "preview" {
+				m.PreviewScroll++
 			}
 		}
 	}
