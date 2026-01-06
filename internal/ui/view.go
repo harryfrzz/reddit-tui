@@ -115,10 +115,9 @@ func (m Model) View() string {
 		Width(postsWidth - 6)
 
 	logoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff4500")).Bold(true)
-	sidebarContent := logoStyle.Render(" ┌─┐┌─┐┌┬┐┌┬┐┬┌┬┐") + "\n"
-	sidebarContent += logoStyle.Render(" ├┬┘├┤  ││ ││││││") + "\n"
-	sidebarContent += logoStyle.Render(" ┴└─└─┘─┴┘─┴┘┴ ┴ ") + "\n"
-	sidebarContent += logoStyle.Render(" T U I       ") + "\n\n"
+	sidebarContent := logoStyle.Render(" ┬─┐┌─┐╔╦╗╦ ╦╦") + "\n"
+	sidebarContent += logoStyle.Render(" ├┬┘├┤  ║ ║ ║║") + "\n"
+	sidebarContent += logoStyle.Render(" ┴└─└─┘ ╩ ╚═╝╩") + "\n\n"
 	for i, item := range m.SidebarItems {
 		style := sidebarItemStyle
 		if m.SidebarCursor == i {
