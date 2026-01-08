@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"reddit-tui/internal/models"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -126,28 +128,87 @@ func (m Model) View() string {
 		sidebarContent += style.Render(item) + "\n"
 	}
 
-	postsContent := postsPaneHeading.Render("POSTS") + "\n\n"
-	for i, post := range m.Posts {
-		if i < m.PostsScroll {
-			continue
-		}
-		titleStyle := postTitleStyle
-		itemStyle := postItemStyle
-		if m.PostsCursor == i {
-			titleStyle = postTitleSelectedStyle
-			itemStyle = postItemActiveStyle
+	var postsContent string
+
+	if m.IsSearching {
+		searchBarStyle := lipgloss.NewStyle().
+			BorderStyle(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#ff5700")).
+			PaddingLeft(1).
+			PaddingRight(1).
+			Width(postsWidth - 6)
+
+		searchIconStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff4500")).Bold(true)
+		searchBarContent := searchIconStyle.Render("Search: ") + m.SearchQuery
+		if m.ActivePane == "posts" {
+			searchBarContent += lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5700")).Render("█")
 		}
 
-		postItemContent := titleStyle.Render(post.Title) + "\n"
-		postItemContent += subredditStyle.Render(post.Subreddit) + " by u/" + post.Author + "\n"
-		postItemContent += metaStyle.Render(fmt.Sprintf("%d upvotes | %d comments", post.GetDisplayUpvotes(), post.Comments))
+		postsContent = postsPaneHeading.Render("EXPLORE") + "\n\n"
+		postsContent += searchBarStyle.Render(searchBarContent) + "\n\n"
 
-		postsContent += itemStyle.Render(postItemContent) + "\n"
+		if m.SearchQuery == "" {
+			hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Align(lipgloss.Center)
+			postsContent += hintStyle.Render("Type to search posts...") + "\n"
+		} else if len(m.SearchResults) == 0 {
+			noResultsStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Align(lipgloss.Center)
+			postsContent += noResultsStyle.Render("No results found") + "\n"
+		} else {
+			// Show search results
+			for i, post := range m.SearchResults {
+				if i < m.PostsScroll {
+					continue
+				}
+				titleStyle := postTitleStyle
+				itemStyle := postItemStyle
+				if m.PostsCursor == i {
+					titleStyle = postTitleSelectedStyle
+					itemStyle = postItemActiveStyle
+				}
+
+				postItemContent := titleStyle.Render(post.Title) + "\n"
+				postItemContent += subredditStyle.Render(post.Subreddit) + " by u/" + post.Author + "\n"
+				postItemContent += metaStyle.Render(fmt.Sprintf("%d upvotes | %d comments", post.GetDisplayUpvotes(), post.Comments))
+
+				postsContent += itemStyle.Render(postItemContent) + "\n"
+			}
+		}
+	} else {
+		postsContent = postsPaneHeading.Render("POSTS") + "\n\n"
+		for i, post := range m.Posts {
+			if i < m.PostsScroll {
+				continue
+			}
+			titleStyle := postTitleStyle
+			itemStyle := postItemStyle
+			if m.PostsCursor == i {
+				titleStyle = postTitleSelectedStyle
+				itemStyle = postItemActiveStyle
+			}
+
+			postItemContent := titleStyle.Render(post.Title) + "\n"
+			postItemContent += subredditStyle.Render(post.Subreddit) + " by u/" + post.Author + "\n"
+			postItemContent += metaStyle.Render(fmt.Sprintf("%d upvotes | %d comments", post.GetDisplayUpvotes(), post.Comments))
+
+			postsContent += itemStyle.Render(postItemContent) + "\n"
+		}
 	}
 
 	var previewLines []string
-	if m.PostsCursor >= 0 && m.PostsCursor < len(m.Posts) {
-		selectedPost := m.Posts[m.PostsCursor]
+
+	// Determine which post to preview
+	var selectedPost *models.Post
+	if m.IsSearching && len(m.SearchResults) > 0 {
+		if m.PostsCursor >= 0 && m.PostsCursor < len(m.SearchResults) {
+			selectedPost = &m.SearchResults[m.PostsCursor]
+		}
+	} else if !m.IsSearching && len(m.Posts) > 0 {
+		if m.PostsCursor >= 0 && m.PostsCursor < len(m.Posts) {
+			selectedPost = &m.Posts[m.PostsCursor]
+		}
+	}
+
+	if selectedPost != nil {
 
 		// Vote indicators
 		upvoteStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginLeft(2)
@@ -209,7 +270,12 @@ func (m Model) View() string {
 	mainContent := lipgloss.JoinHorizontal(lipgloss.Top, sidebar, posts, preview)
 
 	controlTextStyle := metaStyle.Width(m.Width - 4)
-	controlText := controlTextStyle.Render("Tab: switch panes | ↑↓/j/k: navigate/scroll | u: upvote | d: downvote | q: quit")
+	var controlText string
+	if m.IsSearching {
+		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate | Esc: clear search | u: upvote | d: downvote | q: quit")
+	} else {
+		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate/scroll | u: upvote | d: downvote | q: quit")
+	}
 	controlPane := renderPane(controlText, m.Width, controlPaneHeight, "", false)
 
 	return lipgloss.JoinVertical(lipgloss.Left, mainContent, controlPane)
