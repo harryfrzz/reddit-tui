@@ -52,4 +52,4 @@ Contributions are welcome! If you have a feature request or want to report a bug
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Under the GPL 3.0 License. See `LICENSE` for more information.
