@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"reddit-tui/internal/models"
+	"reddit-tui/internal/theme"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -43,7 +44,7 @@ func renderPane(content string, width, height int, borderColor string, active bo
 
 	color := lipgloss.Color(borderColor)
 	if active {
-		color = lipgloss.Color("#ff5700")
+		color = theme.ActiveBorderColor
 	}
 
 	style := lipgloss.NewStyle().
@@ -71,61 +72,58 @@ func (m Model) View() string {
 	}
 	remainingWidth := m.Width - sidebarWidth
 
-	// Adjust layout based on whether settings is shown
 	var postsWidth, previewWidth int
 	if m.ShowSettings {
-		// Full width for settings, no preview pane
 		postsWidth = remainingWidth
 		previewWidth = 0
 	} else {
-		// Normal layout with preview pane
 		postsWidth = remainingWidth / 2
 		previewWidth = remainingWidth - postsWidth
 	}
 
 	paneHeight := m.Height - controlPaneHeight
 
-	postsPaneHeading := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff4500")).Bold(true).MarginLeft(2)
-	// previewPaneHeading := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff4500")).Bold(true).MarginLeft(2)
-	postTitleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#ffb090"))
-	postTitleSelectedStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#ff5700"))
-	subredditStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("33"))
-	metaStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Align(lipgloss.Center)
-	previewTitleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#ff5700")).MarginLeft(2)
-	previewSubredditStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("33")).MarginLeft(2)
-	previewMetaStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginLeft(2)
+	postsPaneHeading := lipgloss.NewStyle().Foreground(theme.PaneHeadingColor).Bold(true).MarginLeft(2)
+	// previewPaneHeading := lipgloss.NewStyle().Foreground(theme.PaneHeadingColor).Bold(true).MarginLeft(2)
+	postTitleStyle := lipgloss.NewStyle().Bold(true).Foreground(theme.PostTitleColor)
+	postTitleSelectedStyle := lipgloss.NewStyle().Bold(true).Foreground(theme.PostTitleSelectedColor)
+	subredditStyle := lipgloss.NewStyle().Foreground(theme.SubredditColor)
+	metaStyle := lipgloss.NewStyle().Foreground(theme.MetaTextColor).Align(lipgloss.Center)
+	previewTitleStyle := lipgloss.NewStyle().Bold(true).Foreground(theme.PreviewTitleColor).MarginLeft(2)
+	previewSubredditStyle := lipgloss.NewStyle().Foreground(theme.PreviewSubredditColor).MarginLeft(2)
+	previewMetaStyle := lipgloss.NewStyle().Foreground(theme.PreviewMetaColor).MarginLeft(2)
 	previewTextStyle := lipgloss.NewStyle().MarginLeft(2)
 
 	sidebarItemStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#ffb090")).
+		Foreground(theme.SidebarItemColor).
 		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#ffb090")).
+		BorderForeground(theme.SidebarItemColor).
 		PaddingLeft(1).
 		PaddingRight(1).
 		Width(sidebarWidth - 4)
 	sidebarItemActiveStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#ff5700")).
+		Foreground(theme.SidebarItemActiveColor).
 		Bold(true).
 		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#ff5700")).
+		BorderForeground(theme.SidebarItemActiveColor).
 		PaddingLeft(1).
 		PaddingRight(1).
 		Width(sidebarWidth - 4)
 
 	postItemStyle := lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#ffb090")).
+		BorderForeground(theme.PostBorderColor).
 		PaddingLeft(1).
 		PaddingRight(1).
 		Width(postsWidth - 6)
 	postItemActiveStyle := lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#ff5700")).
+		BorderForeground(theme.PostBorderActiveColor).
 		PaddingLeft(1).
 		PaddingRight(1).
 		Width(postsWidth - 6)
 
-	logoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff4500")).Bold(true)
+	logoStyle := lipgloss.NewStyle().Foreground(theme.LogoColor).Bold(true)
 	sidebarContent := logoStyle.Render(" ┬─┐┌─┐╔╦╗╦ ╦╦") + "\n"
 	sidebarContent += logoStyle.Render(" ├┬┘├┤  ║ ║ ║║") + "\n"
 	sidebarContent += logoStyle.Render(" ┴└─└─┘ ╩ ╚═╝╩") + "\n\n"
@@ -143,20 +141,20 @@ func (m Model) View() string {
 		// Settings pane
 		postsContent = postsPaneHeading.Render("SETTINGS") + "\n\n"
 
-		settingsLabelStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("252")).Bold(true).MarginLeft(2)
+		settingsLabelStyle := lipgloss.NewStyle().Foreground(theme.SettingsLabelColor).Bold(true).MarginLeft(2)
 		settingsInputStyle := lipgloss.NewStyle().
 			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#ffb090")).
+			BorderForeground(theme.SettingsInputBorderColor).
 			PaddingLeft(1).
 			PaddingRight(1).
 			Width(postsWidth - 8)
 		settingsInputActiveStyle := lipgloss.NewStyle().
 			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#ff5700")).
+			BorderForeground(theme.SettingsInputActiveColor).
 			PaddingLeft(1).
 			PaddingRight(1).
 			Width(postsWidth - 8)
-		settingsHintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginLeft(2)
+		settingsHintStyle := lipgloss.NewStyle().Foreground(theme.SettingsHintColor).MarginLeft(2)
 
 		// API Key field
 		apiKeyLabel := settingsLabelStyle.Render("API Key")
@@ -166,10 +164,10 @@ func (m Model) View() string {
 		}
 		apiKeyValue := m.APIKey
 		if m.EditingField == 1 {
-			apiKeyValue += lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5700")).Render("█")
+			apiKeyValue += lipgloss.NewStyle().Foreground(theme.SettingsCursorColor).Render("█")
 		}
 		if apiKeyValue == "" && m.EditingField != 1 {
-			apiKeyValue = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render("Enter your Reddit API key...")
+			apiKeyValue = lipgloss.NewStyle().Foreground(theme.SettingsPlaceholderColor).Render("Enter your Reddit API key...")
 		}
 
 		postsContent += apiKeyLabel + "\n"
@@ -187,10 +185,10 @@ func (m Model) View() string {
 			clientSecretValue = strings.Repeat("•", len(m.ClientSecret))
 		}
 		if m.EditingField == 2 {
-			clientSecretValue += lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5700")).Render("█")
+			clientSecretValue += lipgloss.NewStyle().Foreground(theme.SettingsCursorColor).Render("█")
 		}
 		if clientSecretValue == "" && m.EditingField != 2 {
-			clientSecretValue = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render("Enter your client secret...")
+			clientSecretValue = lipgloss.NewStyle().Foreground(theme.SettingsPlaceholderColor).Render("Enter your client secret...")
 		}
 
 		postsContent += clientSecretLabel + "\n"
@@ -201,25 +199,25 @@ func (m Model) View() string {
 	} else if m.IsSearching {
 		searchBarStyle := lipgloss.NewStyle().
 			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#ff5700")).
+			BorderForeground(theme.SearchBorderColor).
 			PaddingLeft(1).
 			PaddingRight(1).
 			Width(postsWidth - 6)
 
-		searchIconStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff4500")).Bold(true)
+		searchIconStyle := lipgloss.NewStyle().Foreground(theme.SearchIconColor).Bold(true)
 		searchBarContent := searchIconStyle.Render("Search: ") + m.SearchQuery
 		if m.ActivePane == "posts" {
-			searchBarContent += lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5700")).Render("█")
+			searchBarContent += lipgloss.NewStyle().Foreground(theme.SearchCursorColor).Render("█")
 		}
 
 		postsContent = postsPaneHeading.Render("EXPLORE") + "\n\n"
 		postsContent += searchBarStyle.Render(searchBarContent) + "\n\n"
 
 		if m.SearchQuery == "" {
-			hintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Align(lipgloss.Center)
+			hintStyle := lipgloss.NewStyle().Foreground(theme.SearchHintColor).Align(lipgloss.Center)
 			postsContent += hintStyle.Render("Type to search posts...") + "\n"
 		} else if len(m.SearchResults) == 0 {
-			noResultsStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Align(lipgloss.Center)
+			noResultsStyle := lipgloss.NewStyle().Foreground(theme.NoResultsColor).Align(lipgloss.Center)
 			postsContent += noResultsStyle.Render("No results found") + "\n"
 		} else {
 			// Show search results
@@ -296,16 +294,16 @@ func (m Model) View() string {
 	if selectedPost != nil {
 
 		// Vote indicators
-		upvoteStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginLeft(2)
-		downvoteStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginLeft(2)
+		upvoteStyle := lipgloss.NewStyle().Foreground(theme.VoteDefaultColor).MarginLeft(2)
+		downvoteStyle := lipgloss.NewStyle().Foreground(theme.VoteDefaultColor).MarginLeft(2)
 		upvoteIcon := "▲"
 		downvoteIcon := "▼"
 
 		// Highlight active vote
 		if selectedPost.UserVote == 1 { // VoteUp
-			upvoteStyle = upvoteStyle.Foreground(lipgloss.Color("208")).Bold(true)
+			upvoteStyle = upvoteStyle.Foreground(theme.VoteUpActiveColor).Bold(true)
 		} else if selectedPost.UserVote == 2 { // VoteDown
-			downvoteStyle = downvoteStyle.Foreground(lipgloss.Color("33")).Bold(true)
+			downvoteStyle = downvoteStyle.Foreground(theme.VoteDownActiveColor).Bold(true)
 		}
 
 		previewLines = append(previewLines, "")
@@ -314,9 +312,9 @@ func (m Model) View() string {
 		previewLines = append(previewLines, previewSubredditStyle.Render(selectedPost.Subreddit+" by u/"+selectedPost.Author))
 
 		// Vote section
-		voteCountStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("252")).Bold(true).MarginLeft(2)
+		voteCountStyle := lipgloss.NewStyle().Foreground(theme.VoteCountColor).Bold(true).MarginLeft(2)
 		voteLine := upvoteStyle.Render(upvoteIcon) + " " + voteCountStyle.Render(fmt.Sprintf("%d", selectedPost.GetDisplayUpvotes())) + " " + downvoteStyle.Render(downvoteIcon)
-		voteHintStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginLeft(4)
+		voteHintStyle := lipgloss.NewStyle().Foreground(theme.VoteHintColor).MarginLeft(4)
 		voteHint := voteHintStyle.Render("(u: upvote, d: downvote)")
 
 		previewLines = append(previewLines, voteLine+" "+voteHint)
@@ -348,8 +346,8 @@ func (m Model) View() string {
 	}
 	previewContent := strings.Join(previewLines[scrollOffset:], "\n")
 
-	sidebar := renderPane(sidebarContent, sidebarWidth, paneHeight, "#ffb090", m.ActivePane == "sidebar")
-	posts := renderPane(postsContent, postsWidth, paneHeight, "#ffb090", m.ActivePane == "posts")
+	sidebar := renderPane(sidebarContent, sidebarWidth, paneHeight, theme.Purple, m.ActivePane == "sidebar")
+	posts := renderPane(postsContent, postsWidth, paneHeight, theme.Purple, m.ActivePane == "posts")
 
 	// Conditionally render main content based on settings view
 	var mainContent string
@@ -358,7 +356,7 @@ func (m Model) View() string {
 		mainContent = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, posts)
 	} else {
 		// Include preview pane
-		preview := renderPane(previewContent, previewWidth, paneHeight, "#ffb090", m.ActivePane == "preview")
+		preview := renderPane(previewContent, previewWidth, paneHeight, theme.Purple, m.ActivePane == "preview")
 		mainContent = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, posts, preview)
 	}
 

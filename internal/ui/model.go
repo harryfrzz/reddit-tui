@@ -76,8 +76,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case "ctrl+c":
 			return m, tea.Quit
+		case "q":
+			if m.EditingField != 0 || (m.IsSearching && m.ActivePane == "posts") {
+				if m.ShowSettings && m.EditingField != 0 && m.ActivePane == "posts" {
+					r := []rune(msg.String())[0]
+					if r >= 32 && r < 127 {
+						if m.EditingField == 1 {
+							m.APIKey += msg.String()
+						} else if m.EditingField == 2 {
+							m.ClientSecret += msg.String()
+						}
+					}
+				} else if m.IsSearching && m.ActivePane == "posts" {
+					m.SearchQuery += msg.String()
+					m.performSearch()
+					m.PostsCursor = 0
+					m.PostsScroll = 0
+				}
+			} else {
+				return m, tea.Quit
+			}
 		case "tab":
 			if m.ShowSettings {
 				// Only toggle between sidebar and posts when in settings
