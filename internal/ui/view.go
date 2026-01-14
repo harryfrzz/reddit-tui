@@ -220,9 +220,6 @@ func (m Model) View() string {
 			noResultsStyle := lipgloss.NewStyle().Foreground(theme.NoResultsColor).Align(lipgloss.Center)
 			postsContent += noResultsStyle.Render("No results found") + "\n"
 		} else {
-			// Show search results
-			// Calculate how many posts can fit (each post takes ~5 lines with border)
-			// Account for extra space used by search bar (~4 lines)
 			visiblePosts := (paneHeight - 8) / 5
 			if visiblePosts < 1 {
 				visiblePosts = 1
@@ -250,8 +247,7 @@ func (m Model) View() string {
 		}
 	} else {
 		postsContent = postsPaneHeading.Render("POSTS") + "\n\n"
-		// Calculate how many posts can fit (each post takes ~4 lines with border)
-		visiblePosts := (paneHeight - 4) / 5 // Heading + spacing + post items
+		visiblePosts := (paneHeight - 4) / 5
 		if visiblePosts < 1 {
 			visiblePosts = 1
 		}

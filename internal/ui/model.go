@@ -100,7 +100,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "tab":
 			if m.ShowSettings {
-				// Only toggle between sidebar and posts when in settings
 				switch m.ActivePane {
 				case "sidebar":
 					m.ActivePane = "posts"
@@ -121,7 +120,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "u":
-			// Upvote the current post (only in preview pane)
 			if m.ActivePane == "preview" && m.PostsCursor >= 0 {
 				if m.IsSearching && m.PostsCursor < len(m.SearchResults) {
 					m.SearchResults[m.PostsCursor].ToggleUpvote()
@@ -130,7 +128,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "d":
-			// Downvote the current post (only in preview pane)
 			if m.ActivePane == "preview" && m.PostsCursor >= 0 {
 				if m.IsSearching && m.PostsCursor < len(m.SearchResults) {
 					m.SearchResults[m.PostsCursor].ToggleDownvote()
@@ -139,7 +136,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "enter":
-			// When in sidebar, select the section
 			if m.ActivePane == "sidebar" {
 				switch m.SidebarCursor {
 				case 0: // Home
@@ -161,13 +157,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SettingsCursor = 0
 					m.EditingField = 0
 					m.ActivePane = "posts"
-				case 3: // Login/Auth
-					m.IsSearching = false
-					m.ShowSettings = false
-					m.ActivePane = "posts"
 				}
 			} else if m.ActivePane == "posts" && m.ShowSettings {
-				// Toggle editing mode for settings fields
 				if m.EditingField == 0 {
 					m.EditingField = m.SettingsCursor + 1
 				} else {
@@ -175,7 +166,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "esc":
-			// Exit search mode or settings editing
 			if m.ShowSettings && m.EditingField != 0 {
 				m.EditingField = 0
 			} else if m.IsSearching && m.ActivePane == "posts" {
@@ -183,7 +173,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.SearchResults = []models.Post{}
 			}
 		case "backspace":
-			// Handle backspace in search mode or settings
 			if m.ShowSettings && m.EditingField == 1 && len(m.APIKey) > 0 {
 				m.APIKey = m.APIKey[:len(m.APIKey)-1]
 			} else if m.ShowSettings && m.EditingField == 2 && len(m.ClientSecret) > 0 {
@@ -200,12 +189,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SidebarCursor--
 				}
 			} else if m.ActivePane == "posts" && m.ShowSettings && m.EditingField == 0 {
-				// Navigate settings fields
 				if m.SettingsCursor > 0 {
 					m.SettingsCursor--
 				}
 			} else if m.ActivePane == "posts" {
-				// Only navigate if not in search input mode
 				if !m.IsSearching {
 					if m.PostsCursor > 0 {
 						m.PostsCursor--
@@ -215,7 +202,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						}
 					}
 				} else {
-					// In search mode, navigate through results
 					if m.PostsCursor > 0 {
 						m.PostsCursor--
 						m.PreviewScroll = 0
@@ -235,12 +221,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SidebarCursor++
 				}
 			} else if m.ActivePane == "posts" && m.ShowSettings && m.EditingField == 0 {
-				// Navigate settings fields (2 fields: API Key, Client Secret)
 				if m.SettingsCursor < 1 {
 					m.SettingsCursor++
 				}
 			} else if m.ActivePane == "posts" {
-				// Determine which list to use
 				postsList := m.Posts
 				if m.IsSearching {
 					postsList = m.SearchResults
@@ -249,8 +233,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.PostsCursor < len(postsList)-1 {
 						m.PostsCursor++
 						m.PreviewScroll = 0
-						// Each post takes ~5 lines (3 content lines + 2 border lines)
-						// paneHeight = m.Height - 3 (control pane), then subtract 4 for heading
 						visiblePosts := (m.Height - 3 - 4) / 5
 						if visiblePosts < 1 {
 							visiblePosts = 1
@@ -260,12 +242,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						}
 					}
 				} else {
-					// In search mode, navigate through results
 					if m.PostsCursor < len(postsList)-1 {
 						m.PostsCursor++
 						m.PreviewScroll = 0
-						// Each post takes ~5 lines (3 content lines + 2 border lines)
-						// Account for search bar taking extra space (~4 lines)
 						visiblePosts := (m.Height - 3 - 8) / 5
 						if visiblePosts < 1 {
 							visiblePosts = 1
@@ -279,11 +258,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PreviewScroll++
 			}
 		default:
-			// Handle text input for settings fields
 			if m.ShowSettings && m.EditingField != 0 && m.ActivePane == "posts" {
 				if len(msg.String()) == 1 {
 					r := []rune(msg.String())[0]
-					if r >= 32 && r < 127 { // Printable ASCII
+					if r >= 32 && r < 127 {
 						if m.EditingField == 1 {
 							m.APIKey += msg.String()
 						} else if m.EditingField == 2 {
@@ -294,7 +272,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if m.IsSearching && m.ActivePane == "posts" {
 				if len(msg.String()) == 1 {
 					r := []rune(msg.String())[0]
-					if r >= 32 && r < 127 { // Printable ASCII
+					if r >= 32 && r < 127 {
 						m.SearchQuery += msg.String()
 						m.performSearch()
 						m.PostsCursor = 0

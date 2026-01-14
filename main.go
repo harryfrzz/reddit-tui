@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
 	"reddit-tui/internal/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )

@@ -26,32 +26,27 @@ func (p *Post) GetDisplayUpvotes() int {
 // toggles upvote state
 func (p *Post) ToggleUpvote() {
 	if p.UserVote == VoteUp {
-		// Remove upvote
 		p.UserVote = VoteNone
 		p.VoteOffset = 0
 	} else if p.UserVote == VoteDown {
 		// Switch from downvote to upvote
 		p.UserVote = VoteUp
-		p.VoteOffset = 1 // +1 to cancel downvote, +1 for upvote
+		p.VoteOffset = 1 
 	} else {
-		// Add upvote
+		
 		p.UserVote = VoteUp
 		p.VoteOffset = 1
 	}
 }
 
-// ToggleDownvote toggles downvote state
 func (p *Post) ToggleDownvote() {
 	if p.UserVote == VoteDown {
-		// Remove downvote
 		p.UserVote = VoteNone
 		p.VoteOffset = 0
 	} else if p.UserVote == VoteUp {
-		// Switch from upvote to downvote
 		p.UserVote = VoteDown
-		p.VoteOffset = -1 // -1 to cancel upvote, -1 for downvote
+		p.VoteOffset = -1 
 	} else {
-		// Add downvote
 		p.UserVote = VoteDown
 		p.VoteOffset = -1
 	}
