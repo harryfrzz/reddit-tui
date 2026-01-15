@@ -43,7 +43,7 @@ func (m Model) renderHelpModal() string {
 	var content strings.Builder
 
 	// App Info
-	content.WriteString(titleStyle.Render("🚀 Reddit TUI v1.0.0"))
+	content.WriteString(titleStyle.Render("🚀 Re-TUI v1.0.0"))
 	content.WriteString("\n")
 	content.WriteString(descStyle.Render("A beautiful terminal interface for Reddit"))
 	content.WriteString("\n\n")
