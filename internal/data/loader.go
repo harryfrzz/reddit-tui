@@ -4,7 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 
-	"reddit-tui/internal/models"
+	"re-tui/internal/models"
 )
 
 //go:embed sample_posts.json

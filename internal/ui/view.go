@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"reddit-tui/internal/icons"
-	"reddit-tui/internal/models"
-	"reddit-tui/internal/theme"
+	"re-tui/internal/icons"
+	"re-tui/internal/models"
+	"re-tui/internal/theme"
 
 	"github.com/charmbracelet/lipgloss"
 )

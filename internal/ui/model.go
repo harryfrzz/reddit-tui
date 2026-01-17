@@ -1,9 +1,9 @@
 package ui
 
 import (
-	"reddit-tui/internal/data"
-	"reddit-tui/internal/icons"
-	"reddit-tui/internal/models"
+	"re-tui/internal/data"
+	"re-tui/internal/icons"
+	"re-tui/internal/models"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"

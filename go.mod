@@ -1,4 +1,4 @@
-module reddit-tui
+module re-tui
 
 go 1.25.1
 
