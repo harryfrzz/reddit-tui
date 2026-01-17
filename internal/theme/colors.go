@@ -59,4 +59,12 @@ var (
 	SettingsCursorColor      = lipgloss.Color(LightBlue)
 	SettingsPlaceholderColor = lipgloss.Color(SlateBlue)
 	SettingsHintColor        = lipgloss.Color(SlateBlue)
+
+	// Help Modal
+	HelpModalTitleColor  = lipgloss.Color(ElectricBlue)
+	HelpModalBorderColor = lipgloss.Color(LightBlue)
+	HelpModalKeyColor    = lipgloss.Color(LightBlue)
+	HelpModalDescColor   = lipgloss.Color("252")
+	HelpModalHeaderColor = lipgloss.Color(Purple)
+	HelpModalBgColor     = lipgloss.Color("#1a1a1a")
 )

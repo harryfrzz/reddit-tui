@@ -4,11 +4,124 @@ import (
 	"fmt"
 	"strings"
 
+	"reddit-tui/internal/icons"
 	"reddit-tui/internal/models"
 	"reddit-tui/internal/theme"
 
 	"github.com/charmbracelet/lipgloss"
 )
+
+func (m Model) renderHelpModal() string {
+	titleStyle := lipgloss.NewStyle().
+		Foreground(theme.HelpModalTitleColor).
+		Bold(true).
+		Align(lipgloss.Center).
+		MarginBottom(1)
+
+	headerStyle := lipgloss.NewStyle().
+		Foreground(theme.HelpModalHeaderColor).
+		Bold(true).
+		MarginTop(1).
+		MarginBottom(1)
+
+	keyStyle := lipgloss.NewStyle().
+		Foreground(theme.HelpModalKeyColor).
+		Bold(true).
+		Width(15)
+
+	descStyle := lipgloss.NewStyle().
+		Foreground(theme.HelpModalDescColor)
+
+	tipStyle := lipgloss.NewStyle().
+		Foreground(theme.HelpModalDescColor).
+		Italic(true)
+
+	linkStyle := lipgloss.NewStyle().
+		Foreground(theme.HelpModalKeyColor).
+		Underline(true)
+
+	// Build comprehensive help content
+	var content strings.Builder
+
+	// App Info
+	content.WriteString(titleStyle.Render(icons.Info + " Re-TUI v1.0.0"))
+	content.WriteString("\n")
+	content.WriteString(descStyle.Render("A beautiful terminal interface for Reddit"))
+	content.WriteString("\n\n")
+
+	// Quick keybindings
+	content.WriteString(headerStyle.Render(icons.Help + " Quick Keys"))
+	content.WriteString("\n")
+	content.WriteString(keyStyle.Render("?") + descStyle.Render("Toggle help"))
+	content.WriteString("\n")
+	content.WriteString(keyStyle.Render("Tab") + descStyle.Render("Switch panes"))
+	content.WriteString("\n")
+	content.WriteString(keyStyle.Render("↑↓/j/k") + descStyle.Render("Navigate"))
+	content.WriteString("\n")
+	content.WriteString(keyStyle.Render("u/d") + descStyle.Render("Vote (in preview)"))
+	content.WriteString("\n")
+	content.WriteString(keyStyle.Render("q") + descStyle.Render("Quit"))
+	content.WriteString("\n")
+
+	// Tips & Tricks
+	content.WriteString(headerStyle.Render(icons.Trending + " Tips & Tricks"))
+	content.WriteString("\n")
+	content.WriteString(tipStyle.Render("• Use Tab to quickly switch between panes"))
+	content.WriteString("\n")
+	content.WriteString(tipStyle.Render("• Vim keys (j/k) work for navigation"))
+	content.WriteString("\n")
+	content.WriteString(tipStyle.Render("• Search posts in Explore section"))
+	content.WriteString("\n")
+	content.WriteString(tipStyle.Render("• Configure API keys in Settings"))
+	content.WriteString("\n")
+	content.WriteString(tipStyle.Render("• Vote on posts in preview pane (u/d)"))
+	content.WriteString("\n")
+
+	// Context-aware section
+	content.WriteString(headerStyle.Render(icons.Filter + " Current: " + m.ActivePane))
+	content.WriteString("\n")
+	if m.ActivePane == "sidebar" {
+		content.WriteString(descStyle.Render("Select Home, Explore, or Settings"))
+	} else if m.ActivePane == "posts" {
+		if m.ShowSettings {
+			content.WriteString(descStyle.Render("Configure your Reddit API credentials"))
+		} else if m.IsSearching {
+			content.WriteString(descStyle.Render("Type to search, Esc to clear"))
+		} else {
+			content.WriteString(descStyle.Render("Browse posts, Tab to preview"))
+		}
+	} else if m.ActivePane == "preview" {
+		content.WriteString(descStyle.Render("Read post, scroll with j/k, vote with u/d"))
+	}
+	content.WriteString("\n")
+
+	// Documentation
+	content.WriteString(headerStyle.Render(icons.Post + " Resources"))
+	content.WriteString("\n")
+	content.WriteString(linkStyle.Render("https://github.com/harryfrzz/re-tui"))
+	content.WriteString("\n")
+	content.WriteString(descStyle.Render("Report issues, contribute, or star the repo!"))
+	content.WriteString("\n\n")
+
+	content.WriteString(descStyle.Render("Press ? to close • Made with Bubble Tea"))
+
+	helpContent := content.String()
+
+	// Calculate modal dimensions
+	modalWidth := 60
+	modalHeight := 32
+
+	// Style the modal - lipgloss will handle padding and sizing automatically
+	modalStyle := lipgloss.NewStyle().
+		Width(modalWidth).
+		Height(modalHeight).
+		Padding(1, 2).
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(theme.HelpModalBorderColor).
+		Align(lipgloss.Left, lipgloss.Top)
+
+	return modalStyle.Render(helpContent)
+}
 
 func renderPane(content string, width, height int, borderColor string, active bool) string {
 	innerWidth := width - 2
@@ -359,13 +472,32 @@ func (m Model) View() string {
 	controlTextStyle := metaStyle.Width(m.Width - 4)
 	var controlText string
 	if m.ShowSettings {
-		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate | Esc: exit editing | q: quit")
+		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate | Esc: exit editing | ?: help | q: quit")
 	} else if m.IsSearching {
-		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate | Esc: clear search | u: upvote | d: downvote | q: quit")
+		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate | Esc: clear search | u: upvote | d: downvote | ?: help | q: quit")
 	} else {
-		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate/scroll | u: upvote | d: downvote | q: quit")
+		controlText = controlTextStyle.Render("Enter: select section | Tab: switch panes | ↑↓/j/k: navigate/scroll | u: upvote | d: downvote | ?: help | q: quit")
 	}
 	controlPane := renderPane(controlText, m.Width, controlPaneHeight, "", false)
 
-	return lipgloss.JoinVertical(lipgloss.Left, mainContent, controlPane)
+	fullView := lipgloss.JoinVertical(lipgloss.Left, mainContent, controlPane)
+
+	// Overlay help modal if ShowHelp is true
+	if m.ShowHelp {
+		helpModal := m.renderHelpModal()
+
+		// Place the modal centered with dimmed background
+		overlay := lipgloss.Place(
+			m.Width,
+			m.Height,
+			lipgloss.Center,
+			lipgloss.Center,
+			helpModal,
+			lipgloss.WithWhitespaceChars(" "),
+			lipgloss.WithWhitespaceBackground(lipgloss.Color("#1a1a1a")),
+		)
+		return overlay
+	}
+
+	return fullView
 }

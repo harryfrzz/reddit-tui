@@ -28,6 +28,7 @@ type Model struct {
 	APIKey         string
 	ClientSecret   string
 	EditingField   int
+	ShowHelp       bool
 }
 
 func InitialModel() Model {
@@ -59,6 +60,7 @@ func InitialModel() Model {
 		APIKey:         "",
 		ClientSecret:   "",
 		EditingField:   0,
+		ShowHelp:       false,
 	}
 }
 
@@ -78,6 +80,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "?":
+			m.ShowHelp = !m.ShowHelp
 		case "q":
 			if m.EditingField != 0 || (m.IsSearching && m.ActivePane == "posts") {
 				if m.ShowSettings && m.EditingField != 0 && m.ActivePane == "posts" {
